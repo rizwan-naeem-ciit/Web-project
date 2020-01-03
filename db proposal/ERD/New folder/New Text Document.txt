@@ -1,0 +1,255 @@
+-- MySQL Workbench Forward Engineering
+
+SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0;
+SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;
+SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION';
+
+-- -----------------------------------------------------
+-- Schema mydb
+-- -----------------------------------------------------
+
+-- -----------------------------------------------------
+-- Schema mydb
+-- -----------------------------------------------------
+CREATE SCHEMA IF NOT EXISTS `mydb` DEFAULT CHARACTER SET utf8 ;
+USE `mydb` ;
+
+-- -----------------------------------------------------
+-- Table `mydb`.`User`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `mydb`.`User` (
+  `Id` INT NOT NULL,
+  `User_name` VARCHAR(45) NOT NULL,
+  `Password` VARCHAR(45) NULL,
+  PRIMARY KEY (`Id`))
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `mydb`.`Address`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `mydb`.`Address` (
+  `id` INT NOT NULL,
+  `address` VARCHAR(45) NULL,
+  `Phone_no` VARCHAR(20) NULL,
+  `Email` VARCHAR(45) NULL,
+  PRIMARY KEY (`id`))
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `mydb`.`Student`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `mydb`.`Student` (
+  `Registration_no` INT NOT NULL,
+  `First_name` VARCHAR(45) NOT NULL,
+  `Last_name` VARCHAR(45) NULL,
+  `User_Id` INT NOT NULL,
+  `Address_id` INT NOT NULL,
+  PRIMARY KEY (`Registration_no`),
+  INDEX `fk_Student_User_idx` (`User_Id` ASC) VISIBLE,
+  INDEX `fk_Student_Address1_idx` (`Address_id` ASC) VISIBLE,
+  CONSTRAINT `fk_Student_User`
+    FOREIGN KEY (`User_Id`)
+    REFERENCES `mydb`.`User` (`Id`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
+  CONSTRAINT `fk_Student_Address1`
+    FOREIGN KEY (`Address_id`)
+    REFERENCES `mydb`.`Address` (`id`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `mydb`.`Teacher`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `mydb`.`Teacher` (
+  `Id` INT NOT NULL,
+  `name` VARCHAR(45) NOT NULL,
+  `Address_id` INT NOT NULL,
+  PRIMARY KEY (`Id`),
+  INDEX `fk_Teacher_Address1_idx` (`Address_id` ASC) VISIBLE,
+  CONSTRAINT `fk_Teacher_Address1`
+    FOREIGN KEY (`Address_id`)
+    REFERENCES `mydb`.`Address` (`id`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `mydb`.`Coordinator`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `mydb`.`Coordinator` (
+  `Id` INT NOT NULL,
+  `First_name` VARCHAR(45) NOT NULL,
+  `Last_name` VARCHAR(45) NULL,
+  `User_Id` INT NOT NULL,
+  `Address_id` INT NOT NULL,
+  PRIMARY KEY (`Id`),
+  INDEX `fk_Coordinator_User1_idx` (`User_Id` ASC) VISIBLE,
+  INDEX `fk_Coordinator_Address1_idx` (`Address_id` ASC) VISIBLE,
+  CONSTRAINT `fk_Coordinator_User1`
+    FOREIGN KEY (`User_Id`)
+    REFERENCES `mydb`.`User` (`Id`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
+  CONSTRAINT `fk_Coordinator_Address1`
+    FOREIGN KEY (`Address_id`)
+    REFERENCES `mydb`.`Address` (`id`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `mydb`.`Course`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `mydb`.`Course` (
+  `Id` INT NOT NULL,
+  `Name` VARCHAR(45) NOT NULL,
+  `Credit_hours` VARCHAR(45) NOT NULL,
+  PRIMARY KEY (`Id`))
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `mydb`.`Registered_courses`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `mydb`.`Registered_courses` (
+  `Student_Registration_no` INT NOT NULL,
+  `Course_Id` INT NOT NULL,
+  `Grade` CHAR(1) NULL,
+  PRIMARY KEY (`Student_Registration_no`, `Course_Id`),
+  INDEX `fk_Student_has_Course_Course1_idx` (`Course_Id` ASC) VISIBLE,
+  INDEX `fk_Student_has_Course_Student1_idx` (`Student_Registration_no` ASC) VISIBLE,
+  CONSTRAINT `fk_Student_has_Course_Student1`
+    FOREIGN KEY (`Student_Registration_no`)
+    REFERENCES `mydb`.`Student` (`Registration_no`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
+  CONSTRAINT `fk_Student_has_Course_Course1`
+    FOREIGN KEY (`Course_Id`)
+    REFERENCES `mydb`.`Course` (`Id`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `mydb`.`Course_has_Teacher`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `mydb`.`Course_has_Teacher` (
+  `Course_Id` INT NOT NULL,
+  `Teacher_Id` INT NOT NULL,
+  PRIMARY KEY (`Course_Id`, `Teacher_Id`),
+  INDEX `fk_Course_has_Teacher_Teacher1_idx` (`Teacher_Id` ASC) VISIBLE,
+  INDEX `fk_Course_has_Teacher_Course1_idx` (`Course_Id` ASC) VISIBLE,
+  CONSTRAINT `fk_Course_has_Teacher_Course1`
+    FOREIGN KEY (`Course_Id`)
+    REFERENCES `mydb`.`Course` (`Id`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
+  CONSTRAINT `fk_Course_has_Teacher_Teacher1`
+    FOREIGN KEY (`Teacher_Id`)
+    REFERENCES `mydb`.`Teacher` (`Id`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `mydb`.`Deliverable`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `mydb`.`Deliverable` (
+  `id` INT NOT NULL,
+  `Type` VARCHAR(45) NULL,
+  `Weightage` INT NULL,
+  `Number` VARCHAR(45) NULL,
+  PRIMARY KEY (`id`))
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `mydb`.`Attendence`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `mydb`.`Attendence` (
+  `Lecture_no` INT NOT NULL AUTO_INCREMENT,
+  `date` DATE NOT NULL,
+  `status` CHAR(1) NOT NULL,
+  `Registered_courses_Student_Registration_no` INT NOT NULL,
+  `Registered_courses_Course_Id` INT NOT NULL,
+  PRIMARY KEY (`Lecture_no`, `Registered_courses_Student_Registration_no`, `Registered_courses_Course_Id`),
+  INDEX `fk_Attendence_Registered_courses1_idx` (`Registered_courses_Student_Registration_no` ASC, `Registered_courses_Course_Id` ASC) VISIBLE,
+  CONSTRAINT `fk_Attendence_Registered_courses1`
+    FOREIGN KEY (`Registered_courses_Student_Registration_no` , `Registered_courses_Course_Id`)
+    REFERENCES `mydb`.`Registered_courses` (`Student_Registration_no` , `Course_Id`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `mydb`.`Class`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `mydb`.`Class` (
+  `Number` INT NOT NULL AUTO_INCREMENT,
+  `time` VARCHAR(45) NULL,
+  `day` VARCHAR(45) NULL,
+  `Course_Id` INT NOT NULL,
+  PRIMARY KEY (`Number`, `Course_Id`),
+  INDEX `fk_Class_Course1_idx` (`Course_Id` ASC) VISIBLE,
+  CONSTRAINT `fk_Class_Course1`
+    FOREIGN KEY (`Course_Id`)
+    REFERENCES `mydb`.`Course` (`Id`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `mydb`.`Registered_courses_has_Deliverable`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `mydb`.`Registered_courses_has_Deliverable` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `Registered_courses_Student_Registration_no` INT NOT NULL,
+  `Registered_courses_Course_Id` INT NOT NULL,
+  `Deliverable_id` INT NOT NULL,
+  INDEX `fk_Registered_courses_has_Deliverable_Deliverable1_idx` (`Deliverable_id` ASC) VISIBLE,
+  INDEX `fk_Registered_courses_has_Deliverable_Registered_courses1_idx` (`Registered_courses_Student_Registration_no` ASC, `Registered_courses_Course_Id` ASC) VISIBLE,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `fk_Registered_courses_has_Deliverable_Registered_courses1`
+    FOREIGN KEY (`Registered_courses_Student_Registration_no` , `Registered_courses_Course_Id`)
+    REFERENCES `mydb`.`Registered_courses` (`Student_Registration_no` , `Course_Id`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
+  CONSTRAINT `fk_Registered_courses_has_Deliverable_Deliverable1`
+    FOREIGN KEY (`Deliverable_id`)
+    REFERENCES `mydb`.`Deliverable` (`id`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `mydb`.`Marks`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `mydb`.`Marks` (
+  `deliverable_no` INT NOT NULL,
+  `Registered_courses_has_Deliverable_id` INT NOT NULL,
+  `Total_marks` INT NULL,
+  `Obtained_marks` INT NULL,
+  PRIMARY KEY (`deliverable_no`, `Registered_courses_has_Deliverable_id`),
+  CONSTRAINT `fk_Marks_Registered_courses_has_Deliverable1`
+    FOREIGN KEY (`Registered_courses_has_Deliverable_id`)
+    REFERENCES `mydb`.`Registered_courses_has_Deliverable` (`id`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE)
+ENGINE = InnoDB;
+
+
+SET SQL_MODE=@OLD_SQL_MODE;
+SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
+SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
